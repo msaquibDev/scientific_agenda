@@ -143,19 +143,51 @@ const Dashboard = () => {
 
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+
+    // Check if it's already a proper date string or just a date
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        // If it's not a valid date, return the original string
+        return dateString;
+      }
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      });
+    } catch {
+      return dateString;
+    }
   };
 
-  const formatTime = (dateString: string) => {
-    if (!dateString) return "N/A";
-    return new Date(dateString).toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const formatTime = (timeString: string) => {
+    if (!timeString) return "N/A";
+
+    // If it's already in a readable format like "1:00 PM", return as is
+    if (
+      typeof timeString === "string" &&
+      (timeString.includes("AM") ||
+        timeString.includes("PM") ||
+        timeString.includes(":"))
+    ) {
+      return timeString;
+    }
+
+    // If it's a date string, try to format it
+    try {
+      const date = new Date(timeString);
+      if (!isNaN(date.getTime())) {
+        return date.toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      }
+    } catch {
+      // If parsing fails, return the original string
+    }
+
+    return timeString;
   };
 
   const formatMobile = (mobile: string) => {
@@ -322,12 +354,6 @@ const Dashboard = () => {
                         <span className="text-gray-500">Mobile:</span>
                         <p className="text-gray-900 font-medium">
                           {formatMobile(session.mobile)}
-                        </p>
-                      </div>
-                      <div>
-                        <span className="text-gray-500">Created:</span>
-                        <p className="text-gray-900 font-medium">
-                          {formatDate(session.createdAt)}
                         </p>
                       </div>
                     </div>
